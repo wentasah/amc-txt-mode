@@ -117,13 +117,13 @@ Value nil is the same as 1."
 syntax starting at match of REGEX-START and ending before start
 of the next group, question or answer. The search is limited by
 LIMIT."
-    (when (re-search-forward regex-start limit t)
-      (let* ((qstart (match-beginning 0))
-	     (qend (if (re-search-forward amc-txt-multiline-boundary-re limit t)
-		      (match-beginning 0)
-		    limit)))
-	(goto-char qstart)
-	(re-search-forward (concat regex-start (rx (* anything))) qend))))
+  (when (re-search-forward regex-start limit t)
+    (let* ((qstart (match-beginning 0))
+	   (qend (if (re-search-forward amc-txt-multiline-boundary-re limit t)
+		     (match-beginning 0)
+		   limit)))
+      (goto-char qstart)
+      (re-search-forward (concat regex-start (rx (* anything))) qend))))
 
 (defun amc-txt-search-question (limit)
   "Search for question for fontification purposes."
