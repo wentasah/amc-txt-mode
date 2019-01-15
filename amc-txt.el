@@ -145,10 +145,9 @@ be made optionally invisible."
   "Toggle whether the question options are hidden or not."
   (interactive)
   (let* ((spec '(amc-txt-option . t))
-	 (hidden (member spec buffer-invisibility-spec)))
+	 (hidden (and (listp buffer-invisibility-spec)
+		      (member spec buffer-invisibility-spec))))
     (funcall (if hidden 'remove-from-invisibility-spec 'add-to-invisibility-spec) spec)))
-
-(amc-txt-hide-options nil)
 
 (defgroup amc-txt-mode ()
   "Major mode for editing AMC-TXT files."
@@ -250,6 +249,7 @@ be made optionally invisible."
   (set (make-local-variable 'comment-end) "")
   (set (make-local-variable 'outline-regexp) "^\\*")
   (set (make-local-variable 'outline-level) 'amc-txt-outline-level)
+  (set 'buffer-invisibility-spec nil)
   ;; Set boundaries for fill-paragraph
   (set (make-local-variable 'paragraph-start) "\f\\|^[-*+]\\|\\[/?verbatim]\\|[ \t]*$")
   (set (make-local-variable 'paragraph-separate) "\\[/?verbatim]\\|[ \t\f]*$")
