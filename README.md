@@ -14,6 +14,7 @@ syntax. This mode makes it easier to edit the AMC-TXT files in Emacs.
   <kbd>M-p</kbd>, <kbd>M-N</kbd>, <kbd>M-P</kbd>
 - Folding of questions and groups via `outline-mode`
 - Paragraph filling of single question/answer
+- Hiding of question options
 
 ## Usage
 
@@ -37,3 +38,7 @@ as well as folding of some questions (indicated with `...`):
 
 - Author: Michal Sojka
 - License: GPLv3
+
+<!-- Local Variables: -->
+<!-- mode: markdown -->
+<!-- End: -->

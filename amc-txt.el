@@ -112,12 +112,16 @@ Value nil is the same as 1."
       (setq changed t font-lock-end (match-beginning 0)))
     changed))
 
-(defun amc-txt-font-lock-search (regex-start limit)
+(defun amc-txt-font-lock-search (regex-start limit &optional invisible-groups)
   "Search for (potentionally multi-line) construct of AMC-TXT
 syntax starting at match of REGEX-START and ending before start
 of the next group, question or answer. The search is limited by
-LIMIT."
+LIMIT. INVISIBLE-GROUPS is a list of matched groups that should
+be made optionally invisible."
   (when (re-search-forward regex-start limit t)
+    (dolist (group invisible-groups)
+      (when (match-beginning group)
+	(put-text-property (match-beginning group) (match-end group) 'invisible 'amc-txt-option)))
     (let* ((qstart (match-beginning 0))
 	   (qend (if (re-search-forward amc-txt-multiline-boundary-re limit t)
 		     (match-beginning 0)
@@ -127,7 +131,7 @@ LIMIT."
 
 (defun amc-txt-search-question (limit)
   "Search for question for fontification purposes."
-  (amc-txt-font-lock-search amc-txt-question-re limit))
+  (amc-txt-font-lock-search amc-txt-question-re limit '(2 3 4)))
 
 (defun amc-txt-search-answer-pos (limit)
   "Search for answer for fontification purposes."
@@ -137,6 +141,14 @@ LIMIT."
   "Search for answer for fontification purposes."
   (amc-txt-font-lock-search (amc-txt-answer-re "-")  limit))
 
+(defun amc-txt-toggle-hide-options ()
+  "Toggle whether the question options are hidden or not."
+  (interactive)
+  (let* ((spec '(amc-txt-option . t))
+	 (hidden (member spec buffer-invisibility-spec)))
+    (funcall (if hidden 'remove-from-invisibility-spec 'add-to-invisibility-spec) spec)))
+
+(amc-txt-hide-options nil)
 
 (defgroup amc-txt-mode ()
   "Major mode for editing AMC-TXT files."
