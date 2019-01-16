@@ -119,9 +119,11 @@ of the next group, question or answer. The search is limited by
 LIMIT. INVISIBLE-GROUPS is a list of matched groups that should
 be made optionally invisible."
   (when (re-search-forward regex-start limit t)
-    (dolist (group invisible-groups)
-      (when (match-beginning group)
-	(put-text-property (match-beginning group) (match-end group) 'invisible 'amc-txt-option)))
+    (when invisible-groups
+      (remove-text-properties (match-beginning 0) (match-end 0) '(invisible nil))
+      (dolist (group invisible-groups)
+	(when (match-beginning group)
+	  (put-text-property (match-beginning group) (match-end group) 'invisible 'amc-txt-option))))
     (let* ((qstart (match-beginning 0))
 	   (qend (if (re-search-forward amc-txt-multiline-boundary-re limit t)
 		     (match-beginning 0)
