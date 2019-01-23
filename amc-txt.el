@@ -246,15 +246,15 @@ be made optionally invisible."
 (define-derived-mode amc-txt-mode text-mode "AMC-TXT"
   "Major mode for editing auto-multipe-choice plain text files
 \\{text-mode-map}"
-  (set (make-local-variable 'font-lock-defaults) '(amc-txt-mode-font-lock-keywords t t))
-  (set (make-local-variable 'comment-start) "# ")
-  (set (make-local-variable 'comment-end) "")
-  (set (make-local-variable 'outline-regexp) "^\\*")
-  (set (make-local-variable 'outline-level) 'amc-txt-outline-level)
+  (setq-local font-lock-defaults '(amc-txt-mode-font-lock-keywords t t))
+  (setq-local comment-start "# ")
+  (setq-local comment-end "")
+  (setq-local outline-regexp "^\\*")
+  (setq-local outline-level 'amc-txt-outline-level)
   (set 'buffer-invisibility-spec nil)
   ;; Set boundaries for fill-paragraph
-  (set (make-local-variable 'paragraph-start) "\f\\|^[-*+]\\|\\[/?verbatim]\\|[ \t]*$")
-  (set (make-local-variable 'paragraph-separate) "\\[/?verbatim]\\|[ \t\f]*$")
+  (setq-local paragraph-start "\f\\|^[-*+]\\|\\[/?verbatim]\\|[ \t]*$")
+  (setq-local paragraph-separate "\\[/?verbatim]\\|[ \t\f]*$")
 
   (add-to-list 'font-lock-extend-region-functions 'amc-txt-font-lock-extend-region))
 
