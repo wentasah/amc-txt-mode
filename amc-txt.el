@@ -256,6 +256,9 @@ be made optionally invisible."
   (setq-local paragraph-start "\f\\|^[-*+]\\|\\[/?verbatim]\\|[ \t]*$")
   (setq-local paragraph-separate "\\[/?verbatim]\\|[ \t\f]*$")
 
+  ;; Add '+' to and remove some other characters from default value of adaptive-fill-regexp
+  (setq-local adaptive-fill-regexp "[ \t]*\\([-+–#*·•‣⁃◦]+[ \t]*\\)*")
+
   (add-to-list 'font-lock-extend-region-functions 'amc-txt-font-lock-extend-region))
 
 ;;;###autoload
