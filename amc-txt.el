@@ -41,7 +41,12 @@
       (optional (group-n 2 "<" (*? any) ">"))
       (optional (group-n 3 "[" (*? any) "]"))
       (optional (group-n 4 "{" (*? any) "}"))
-      (* blank) (group-n 5 (* any))))
+      ;; The 'not parens' is for avoiding matching a group.  This is
+      ;; not strictly correct: if the text starts with a paren and an
+      ;; option is included, eg in `*[horiz](Question' group 5 will
+      ;; include the [horiz] part.  We may consider this a
+      ;; pathological case.
+      (* blank) (group-n 5 (not (any "(" ")")) (* any))))
 
 (defconst amc-txt-group-re
   (rx line-start
@@ -54,7 +59,7 @@
 	  buffer-end)))
 
 (defun amc-txt-answer-re (type)
-  "Return regular expression matching an anwer.
+  "Return regular expression matching an answer.
 TYPE is a string representing a set of charcters to distinguish
 type of answer to match.  When '+', it matches correct answer,
 when '-', incorrect answer, when '+-', it matches both."
@@ -158,7 +163,7 @@ be made optionally invisible."
 
 (defface amc-txt-group
   '((((class color)) :foreground "DimGray"))
-  "AMC correct answer"
+  "AMC group"
   :group 'amc-txt-mode)
 
 (defface amc-txt-options
@@ -167,10 +172,16 @@ be made optionally invisible."
   :group 'amc-txt-mode)
 
 (defface amc-txt-question
+  '((((class color) (min-colors 88) (background light)) :foreground "Black")
+    (((class color) (min-colors 8)) :foreground "black"))
+  "AMC question"
+  :group 'amc-txt-mode)
+
+(defface amc-txt-question-heading
   '((((class color) (min-colors 88) (background light)) :foreground "Blue1")
     (((class color) (min-colors 8)) :foreground "blue" :weight bold)
     (t :inverse-video t :weight bold))
-  "AMC question"
+  "AMC question heading"
   :group 'amc-txt-mode)
 
 (defface amc-txt-correct
@@ -213,9 +224,11 @@ be made optionally invisible."
 	    (1 'amc-txt-options t t)))
 	(amc-txt-search-question
 	 . ((0 'amc-txt-question)
+	    (1 'amc-txt-question-heading t t)
 	    (2 'amc-txt-options t t)
 	    (3 'amc-txt-options t t)
-	    (4 'amc-txt-options t t)))
+	    (4 'amc-txt-options t t)
+	    (5 'amc-txt-question-heading t t)))
 	(amc-txt-search-answer-pos
 	 . ((0 'amc-txt-correct)
 	    (1 'amc-txt-options t t)
