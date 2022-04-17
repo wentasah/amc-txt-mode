@@ -49,6 +49,27 @@
       (optional (group-n 1 "[" (*? any) "]"))
       (* blank) (group-n 2 (* any))))
 
+;; verbatim blocks are a bit complex to manage, because other
+;; constructs (such as answers) may appear inside, but should be
+;; ignored.  In order to ensure that, we:
+;;
+;;   - put verbatim blocks early in the search-based fontification
+;;     rules so that other rules match later and do not override face.
+;;
+;;   - add amc-txt-font-lock-extend-verbatim to
+;;     font-lock-extend-region-functions.
+;;
+;; There's still the problem of amc-txt-question-re being stopped too
+;; early at an answer-like pattern inside a verbatim.
+
+(defun amc-txt-search-verbatim-block (limit)
+  "Search for the next verbatim block (search-based fontification)"
+  (when (search-forward "[verbatim]" limit t)
+    (let ((b (point)))
+      (when (search-forward "[/verbatim]" limit t)
+	(set-match-data (list b (match-beginning 0)))
+	(point)))))
+
 (defconst amc-txt-multiline-boundary-re
   (rx (or (seq line-start (* blank) (any "-+*#"))
 	  buffer-end)))
@@ -111,6 +132,14 @@ Value nil is the same as 1."
     (unless (eq font-lock-end (match-beginning 0))
       (setq changed t font-lock-end (match-beginning 0)))
     changed))
+
+(defun amc-txt-font-lock-extend-verbatim ()
+  "Move fontification boundaries for verbatim construct."
+  (goto-char font-lock-beg)
+  (when (equal (get-text-property (point) 'face) 'amc-txt-verbatim)
+    (setq font-lock-beg (min font-lock-beg (search-backward "[verbatim]"))
+	  font-lock-end (max font-lock-end (search-forward "[/verbatim]")))
+    t))
 
 (defun amc-txt-font-lock-search (regex-start limit &optional invisible-groups)
   "Search for (potentionally multi-line) construct of AMC-TXT
@@ -197,6 +226,12 @@ be made optionally invisible."
   "AMC wrong answer"
   :group 'amc-txt-mode)
 
+(defface amc-txt-verbatim
+  '((t :inherit shadow))
+  "AMC verbatim block"
+  :group 'amc-txt-mode)
+
+
 (defmacro amc-txt-markup (start end &rest rest)
   "Helper macro for markup fontification."
   `(cons (rx (group-n 1 ,start) (group-n 3 (*? any))  (group-n 2 ,end))
@@ -225,6 +260,8 @@ be made optionally invisible."
 	(,amc-txt-group-re
 	 . ((0 'amc-txt-group)
 	    (1 'amc-txt-options t t)))
+	(amc-txt-search-verbatim-block
+	 . ((0 'amc-txt-verbatim t)))
 	(amc-txt-search-question
 	 . ((0 'amc-txt-question)
 	    (1 'amc-txt-question-heading t t)
@@ -275,6 +312,7 @@ be made optionally invisible."
   ;; Add '+' to and remove some other characters from default value of adaptive-fill-regexp
   (setq-local adaptive-fill-regexp "[ \t]*\\([-+–#*·•‣⁃◦]+[ \t]*\\)*")
 
+  (add-to-list 'font-lock-extend-region-functions 'amc-txt-font-lock-extend-verbatim)
   (add-to-list 'font-lock-extend-region-functions 'amc-txt-font-lock-extend-region))
 
 ;;;###autoload
