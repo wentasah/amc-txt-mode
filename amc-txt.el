@@ -41,12 +41,7 @@
       (optional (group-n 2 "<" (*? any) ">"))
       (optional (group-n 3 "[" (*? any) "]"))
       (optional (group-n 4 "{" (*? any) "}"))
-      ;; The 'not parens' is for avoiding matching a group.  This is
-      ;; not strictly correct: if the text starts with a paren and an
-      ;; option is included, eg in `*[horiz](Question' group 5 will
-      ;; include the [horiz] part.  We may consider this a
-      ;; pathological case.
-      (* blank) (group-n 5 (not (any "(" ")")) (* any))))
+      (* blank) (group-n 5 (* any))))
 
 (defconst amc-txt-group-re
   (rx line-start
@@ -138,7 +133,15 @@ be made optionally invisible."
 
 (defun amc-txt-search-question (limit)
   "Search for question for fontification purposes."
-  (amc-txt-font-lock-search amc-txt-question-re limit '(2 3 4)))
+  (catch 'found
+    (while (amc-txt-font-lock-search amc-txt-question-re limit '(2 3 4))
+      ;; Since the amc-txt-question-re can match the same text as
+      ;; amc-txt-group-re, we return t only if we don't simultaneously
+      ;; match a group. Without that, extra text after the group
+      ;; start/end is highlighted as a question body.
+      (unless (save-excursion (goto-char (match-beginning 0))
+                              (looking-at-p amc-txt-group-re))
+        (throw 'found t)))))
 
 (defun amc-txt-search-answer-pos (limit)
   "Search for answer for fontification purposes."
