@@ -158,7 +158,7 @@ be made optionally invisible."
 		     (match-beginning 0)
 		   limit)))
       (goto-char qstart)
-      (re-search-forward (concat regex-start (rx (* anything))) qend))))
+      (re-search-forward (concat regex-start (rx (group-n 99 (* anything)))) qend))))
 
 (defun amc-txt-search-question (limit)
   "Search for question for fontification purposes."
@@ -263,12 +263,12 @@ be made optionally invisible."
 	(amc-txt-search-verbatim-block
 	 . ((0 'amc-txt-verbatim t)))
 	(amc-txt-search-question
-	 . ((0 'amc-txt-question)
-	    (1 'amc-txt-question-heading t t)
-	    (2 'amc-txt-options t t)
-	    (3 'amc-txt-options t t)
-	    (4 'amc-txt-options t t)
-	    (5 'amc-txt-question-heading t t)))
+	 . ((1 'amc-txt-question-heading)
+	    (2 'amc-txt-options nil t)
+	    (3 'amc-txt-options nil t)
+	    (4 'amc-txt-options nil t)
+	    (5 'amc-txt-question-heading)
+            (99 'amc-txt-question keep))) ; see amc-txt-font-lock-search
 	(amc-txt-search-answer-pos
 	 . ((0 'amc-txt-correct)
 	    (1 'amc-txt-options t t)
