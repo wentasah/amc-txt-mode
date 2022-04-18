@@ -67,6 +67,7 @@
   (when (search-forward "[verbatim]" limit t)
     (let ((b (point)))
       (when (search-forward "[/verbatim]" limit t)
+        (put-text-property b (match-beginning 0) 'verbatim t)
 	(set-match-data (list b (match-beginning 0)))
 	(point)))))
 
@@ -135,11 +136,12 @@ Value nil is the same as 1."
 
 (defun amc-txt-font-lock-extend-verbatim ()
   "Move fontification boundaries for verbatim construct."
-  (goto-char font-lock-beg)
-  (when (equal (get-text-property (point) 'face) 'amc-txt-verbatim)
-    (setq font-lock-beg (min font-lock-beg (search-backward "[verbatim]"))
-	  font-lock-end (max font-lock-end (search-forward "[/verbatim]")))
-    t))
+  (or (when (get-text-property font-lock-beg 'verbatim)
+        (goto-char font-lock-beg)
+        (setq font-lock-beg (min font-lock-beg (search-backward "[verbatim]"))))
+      (when (get-text-property font-lock-end 'verbatim)
+        (goto-char font-lock-end)
+        (setq font-lock-end (max font-lock-end (search-forward "[/verbatim]"))))))
 
 (defun amc-txt-font-lock-search (regex-start limit &optional invisible-groups)
   "Search for (potentionally multi-line) construct of AMC-TXT
@@ -312,6 +314,7 @@ be made optionally invisible."
   ;; Add '+' to and remove some other characters from default value of adaptive-fill-regexp
   (setq-local adaptive-fill-regexp "[ \t]*\\([-+–#*·•‣⁃◦]+[ \t]*\\)*")
 
+  (setq-local font-lock-extra-managed-props '(verbatim))
   (add-to-list 'font-lock-extend-region-functions 'amc-txt-font-lock-extend-verbatim)
   (add-to-list 'font-lock-extend-region-functions 'amc-txt-font-lock-extend-region))
 
